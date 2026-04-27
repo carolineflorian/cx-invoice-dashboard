@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Tickets — 2026 YTD</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #EEF3FA; color: #1A2E4A; }
+
+  header { background: linear-gradient(135deg, #1A3F6F, #2E6DB4); color: white; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header p { font-size: 12px; opacity: 0.8; margin-top: 3px; }
+
+  /* Active filter chips */
+  .active-filters { background: #F0F5FC; border-bottom: 1px solid #D8E8F5; padding: 8px 32px; display: flex; gap: 8px; align-items: center; min-height: 36px; flex-wrap: wrap; }
+  .active-filters span { font-size: 11px; color: #7A90A8; }
+  .chip { background: #2E6DB4; color: white; border-radius: 12px; padding: 3px 10px; font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .chip .remove { cursor: pointer; opacity: 0.8; font-size: 13px; line-height: 1; }
+  .chip .remove:hover { opacity: 1; }
+
+  /* Filter bar */
+  .filter-bar { background: white; border-bottom: 1px solid #D8E8F5; padding: 12px 32px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; box-shadow: 0 2px 6px rgba(30,77,140,0.06); }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-size: 11px; font-weight: 600; color: #7A90A8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1.5px solid #C8DAEA; background: white; color: #2E6DB4; transition: all 0.15s; font-weight: 500; }
+  .pill:hover { background: #EEF3FA; }
+  .pill.active { background: #2E6DB4; color: white; border-color: #2E6DB4; }
+  .filter-divider { width: 1px; height: 24px; background: #D8E8F5; flex-shrink: 0; }
+  .reset-btn { margin-left: auto; padding: 5px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1.5px solid #C8DAEA; background: white; color: #7A90A8; transition: all 0.15s; }
+  .reset-btn:hover { background: #EEF3FA; color: #2E6DB4; }
+
+  /* KPI cards */
+  .stats { display: flex; gap: 14px; padding: 20px 32px 0; }
+  .stat { background: white; border-radius: 10px; padding: 16px 20px; flex: 1; box-shadow: 0 1px 4px rgba(30,77,140,0.07); text-align: center; border-top: 3px solid #2E6DB4; }
+  .stat .number { font-size: 32px; font-weight: 700; color: #2E6DB4; transition: all 0.3s; }
+  .stat .label { font-size: 11px; color: #7A90A8; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat .sub { font-size: 11px; color: #B0C2D8; margin-top: 2px; }
+  .stat.highlight { border-top-color: #1A3F6F; }
+  .stat.highlight .number { color: #1A3F6F; }
+
+  /* Grid */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px 32px; }
+  .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(30,77,140,0.07); }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { font-size: 12px; font-weight: 600; margin-bottom: 14px; color: #7A90A8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+  .card h2 .badge { background: #EEF3FA; color: #2E6DB4; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .card .click-hint { font-size: 10px; color: #B0C2D8; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+  /* Clickable cursor on charts */
+  canvas { cursor: pointer; }
+
+  /* Language table */
+  .lang-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .lang-item { background: #F0F5FC; border-radius: 8px; padding: 9px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; }
+  .lang-item:hover { border-color: #5B9BD5; background: #E4EFF8; }
+  .lang-item.active { border-color: #2E6DB4; background: #DCF0F8; }
+  .lang-item .count { font-weight: 700; color: #2E6DB4; }
+  .lang-item .bar { height: 3px; background: #2E6DB4; border-radius: 2px; margin-top: 4px; transition: width 0.3s; }
+
+  #world-map { width: 100%; height: 400px; }
+  footer { text-align: center; padding: 16px; color: #B0C2D8; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 Invoice Support Tickets — 2026 YTD</h1>
+    <p>Todoist CX · Jan 1 – Apr 27, 2026 · First customer message methodology</p>
+  </div>
+  <span style="font-size:11px;opacity:0.7">Last updated: Apr 27, 2026</span>
+</header>
+
+<!-- Active filter chips -->
+<div class="active-filters" id="activeFilters">
+  <span>No filters active — click any chart element to filter</span>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">Month</span>
+    <button class="pill active" data-filter="month" data-value="all">All</button>
+    <button class="pill" data-filter="month" data-value="jan">Jan</button>
+    <button class="pill" data-filter="month" data-value="feb">Feb</button>
+    <button class="pill" data-filter="month" data-value="mar">Mar</button>
+    <button class="pill" data-filter="month" data-value="apr">Apr</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Language</span>
+    <button class="pill active" data-filter="lang" data-value="all">All</button>
+    <button class="pill" data-filter="lang" data-value="en">🇺🇸 English</button>
+    <button class="pill" data-filter="lang" data-value="de">🇩🇪 German</button>
+    <button class="pill" data-filter="lang" data-value="es">🇪🇸 Spanish</button>
+    <button class="pill" data-filter="lang" data-value="fr">🇫🇷 French</button>
+    <button class="pill" data-filter="lang" data-value="other">🌐 Other</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Status</span>
+    <button class="pill active" data-filter="status" data-value="all">All</button>
+    <button class="pill" data-filter="status" data-value="solved">Solved</button>
+    <button class="pill" data-filter="status" data-value="open">Open</button>
+    <button class="pill" data-filter="status" data-value="pending">Pending</button>
+  </div>
+  <button class="reset-btn" id="resetBtn">↺ Reset all</button>
+</div>
+
+<!-- KPI Cards -->
+<div class="stats">
+  <div class="stat highlight">
+    <div class="number" id="kpi-total">640</div>
+    <div class="label">Total tickets</div>
+    <div class="sub" id="kpi-total-sub">Jan–Apr 2026</div>
+  </div>
+  <div class="stat">
+    <div class="number" id="kpi-daily">5.6</div>
+    <div class="label">Avg per day</div>
+    <div class="sub">tickets/day</div>
+  </div>
+  <div class="stat">
+    <div class="number" id="kpi-solved">84%</div>
+    <div class="label">Resolution rate</div>
+    <div class="sub">solved + closed</div>
+  </div>
+  <div class="stat">
+    <div class="number" id="kpi-top-lang">EN</div>
+    <div class="label">Top language</div>
+    <div class="sub" id="kpi-top-lang-sub">282 tickets (44%)</div>
+  </div>
+  <div class="stat">
+    <div class="number" id="kpi-top-kw">invoice</div>
+    <div class="label">Top keyword</div>
+    <div class="sub" id="kpi-top-kw-sub">317 matches (50%)</div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2>📅 Monthly volume <span class="badge" id="monthly-badge">4 months</span> <span class="click-hint">↑ click bar to filter</span></h2>
+    <canvas id="monthlyChart" style="max-height:180px"></canvas>
+  </div>
+
+  <div class="card full">
+    <h2>📈 Daily volume <span class="badge" id="daily-badge">114 days</span></h2>
+    <canvas id="dailyChart" style="max-height:200px"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>🌍 Language breakdown <span class="badge" id="lang-badge">16 langs</span> <span class="click-hint">↑ click to filter</span></h2>
+    <canvas id="langChart" style="max-height:260px"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>🔑 Invoice keyword <span class="badge" id="kw-badge">10 keywords</span> <span class="click-hint">↑ click to filter</span></h2>
+    <canvas id="keywordChart" style="max-height:260px"></canvas>
+  </div>
+
+  <div class="card full">
+    <h2>🗺️ User locations <span class="badge" id="map-badge">18 countries</span> <span class="click-hint">↑ click country to filter</span></h2>
+    <div id="world-map"></div>
+  </div>
+
+  <div class="card full">
+    <h2>📋 Language details <span class="click-hint">↑ click row to filter</span></h2>
+    <div class="lang-grid" id="langGrid"></div>
+  </div>
+
+</div>
+
+<footer>Generated by Claude · Caroline Florian · Todoist CX · April 2026 · Data: first customer message methodology</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const MONTHS = {
+  jan: {
+    label:'January', total:220,
+    days:{"01-02":12,"01-03":6,"01-04":5,"01-05":11,"01-06":6,"01-07":10,"01-08":11,"01-09":7,"01-10":8,"01-11":8,"01-12":10,"01-13":11,"01-14":10,"01-15":5,"01-16":5,"01-17":7,"01-18":5,"01-19":4,"01-20":8,"01-21":6,"01-22":9,"01-23":6,"01-24":2,"01-26":10,"01-27":10,"01-28":8,"01-29":7,"01-30":8,"01-31":5},
+    langs:{en:108,unknown:53,de:13,nl:9,es:8,fr:6,pl:4,pt_br:4,other:15},
+    keywords:{invoice:116,receipt:48,rechnung:19,factura:8,facture:7,recibo:6,fatura:4,fattura:4,other:8},
+    statuses:{solved:1,closed:219,open:0,pending:0},
+    map:{US:108,DE:13,NL:9,ES:8,FR:6,PL:4,BR:4,GB:40,AU:10,CA:12,IT:3,KR:2,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
+  },
+  feb: {
+    label:'February', total:143,
+    days:{"02-01":2,"02-02":6,"02-03":5,"02-04":15,"02-06":2,"02-07":5,"02-08":4,"02-09":7,"02-10":8,"02-11":3,"02-12":9,"02-13":5,"02-14":3,"02-16":4,"02-17":10,"02-18":6,"02-19":7,"02-20":5,"02-22":4,"02-23":9,"02-24":7,"02-25":7,"02-26":4,"02-27":5,"02-28":1},
+    langs:{en:58,unknown:43,de:12,fr:6,es:5,pl:4,pt_br:4,nl:4,other:7},
+    keywords:{invoice:72,receipt:33,rechnung:15,facture:7,factura:7,faktura:4,fattura:2,fatura:2,other:1},
+    statuses:{solved:3,closed:139,open:0,pending:0,hold:1},
+    map:{US:58,DE:12,FR:6,ES:5,PL:4,BR:4,NL:4,GB:20,AU:6,CA:8,IT:2,KR:1,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
+  },
+  mar: {
+    label:'March', total:190,
+    days:{"03-01":2,"03-02":8,"03-03":5,"03-04":10,"03-05":6,"03-06":4,"03-07":3,"03-08":6,"03-09":11,"03-10":8,"03-11":14,"03-12":4,"03-13":12,"03-14":4,"03-15":2,"03-16":12,"03-17":5,"03-18":7,"03-19":3,"03-20":3,"03-21":3,"03-22":5,"03-23":14,"03-24":9,"03-25":4,"03-26":6,"03-27":3,"03-29":3,"03-30":7,"03-31":7},
+    langs:{en:83,unknown:47,de:20,fr:6,es:6,it:4,nl:4,other:20},
+    keywords:{invoice:81,receipt:59,rechnung:15,factura:10,facture:9,recibo:3,factuur:3,other:10},
+    statuses:{solved:35,closed:155,open:0,pending:0},
+    map:{US:83,DE:20,FR:6,ES:6,IT:4,NL:4,GB:22,AU:8,CA:10,BR:5,PL:3,KR:2,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
+  },
+  apr: {
+    label:'April', total:87,
+    days:{"04-02":6,"04-03":1,"04-04":3,"04-05":3,"04-06":2,"04-07":4,"04-08":7,"04-09":6,"04-10":3,"04-11":1,"04-13":5,"04-14":5,"04-15":7,"04-16":2,"04-18":1,"04-19":1,"04-20":6,"04-21":5,"04-22":7,"04-23":6,"04-24":1,"04-25":1,"04-26":4,"04-27":0},
+    langs:{en:33,unknown:18,de:10,es:3,fr:2,pt_br:2,cs:1,pl:1,ru:1,it:1,nl:1,ko:1,other:13},
+    keywords:{invoice:48,receipt:11,rechnung:9,factura:5,facture:2,fattura:2,other:10},
+    statuses:{solved:54,open:10,pending:12,closed:3,new:2,hold:1},
+    map:{US:33,DE:10,ES:3,FR:2,BR:3,GB:15,AU:5,CA:5,PL:1,IT:1,NL:1,KR:1,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
+  }
+};
+
+const ISO3 = {US:'USA',GB:'GBR',AU:'AUS',CA:'CAN',DE:'DEU',ES:'ESP',FR:'FRA',NL:'NLD',BR:'BRA',PL:'POL',IT:'ITA',KR:'KOR',RU:'RUS',JP:'JPN',DK:'DNK',NO:'NOR',ID:'IDN',CZ:'CZE'};
+const ISO2_FROM_ISO3 = Object.fromEntries(Object.entries(ISO3).map(([k,v])=>[v,k]));
+const COUNTRY_NAMES = {US:'United States',GB:'United Kingdom',AU:'Australia',CA:'Canada',DE:'Germany',ES:'Spain',FR:'France',NL:'Netherlands',BR:'Brazil',PL:'Poland',IT:'Italy',KR:'South Korea',RU:'Russia',JP:'Japan',DK:'Denmark',NO:'Norway',ID:'Indonesia',CZ:'Czech Republic'};
+const COUNTRY_TO_LANG = {US:'en',GB:'en',AU:'en',CA:'en',DE:'de',ES:'es',FR:'fr',NL:'other',BR:'other',PL:'other',IT:'other',KR:'other',RU:'other',JP:'other',DK:'other',NO:'other',ID:'other',CZ:'other'};
+const LANG_META = {
+  en:{flag:'🇺🇸🇬🇧',label:'English'}, unknown:{flag:'🌐',label:'Unknown'},
+  de:{flag:'🇩🇪',label:'German'}, es:{flag:'🇪🇸',label:'Spanish'},
+  fr:{flag:'🇫🇷',label:'French'}, nl:{flag:'🇳🇱',label:'Dutch'},
+  pt_br:{flag:'🇧🇷',label:'Portuguese BR'}, pl:{flag:'🇵🇱',label:'Polish'},
+  it:{flag:'🇮🇹',label:'Italian'}, ko:{flag:'🇰🇷',label:'Korean'},
+  ru:{flag:'🇷🇺',label:'Russian'}, ja:{flag:'🇯🇵',label:'Japanese'},
+  da:{flag:'🇩🇰',label:'Danish'}, nb:{flag:'🇳🇴',label:'Norwegian'},
+  id:{flag:'🇮🇩',label:'Indonesian'}, cs:{flag:'🇨🇿',label:'Czech'},
+  other:{flag:'🌏',label:'Other'},
+};
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all' };
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function getSelectedMonths() {
+  return state.month === 'all' ? ['jan','feb','mar','apr'] : [state.month];
+}
+
+function getFilteredData() {
+  const months = getSelectedMonths();
+  const d = { total:0, days:{}, langs:{}, keywords:{}, statuses:{}, map:{} };
+  for (const m of months) {
+    const src = MONTHS[m];
+    d.total += src.total;
+    Object.entries(src.days).forEach(([k,v]) => d.days[k] = (d.days[k]||0)+v);
+    Object.entries(src.langs).forEach(([k,v]) => d.langs[k] = (d.langs[k]||0)+v);
+    Object.entries(src.keywords).forEach(([k,v]) => d.keywords[k] = (d.keywords[k]||0)+v);
+    Object.entries(src.statuses).forEach(([k,v]) => d.statuses[k] = (d.statuses[k]||0)+v);
+    Object.entries(src.map).forEach(([k,v]) => d.map[k] = (d.map[k]||0)+v);
+  }
+
+  // Language filter — scale down counts proportionally
+  if (state.lang !== 'all') {
+    const langMap = {en:['US','GB','AU','CA'],de:['DE'],es:['ES'],fr:['FR'],other:['NL','BR','PL','IT','KR','RU','JP','DK','NO','ID','CZ']};
+    const keepCountries = langMap[state.lang] || [];
+    // Dim non-matching countries on map
+    Object.keys(d.map).forEach(k => { if (!keepCountries.includes(k)) d.map[k] = 0; });
+    // Filter langs to just selected
+    const langTotal = d.langs[state.lang] || 0;
+    Object.keys(d.langs).forEach(k => { if (k !== state.lang) d.langs[k] = 0; });
+    d.total = langTotal;
+  }
+
+  // Country filter
+  if (state.country !== 'all') {
+    Object.keys(d.map).forEach(k => { if (k !== state.country) d.map[k] = 0; });
+    // Map country to lang
+    const cLang = COUNTRY_TO_LANG[state.country];
+    if (cLang) {
+      const v = d.langs[cLang] || 0;
+      Object.keys(d.langs).forEach(k => { if (k !== cLang && k !== 'unknown') d.langs[k] = 0; });
+      d.total = v;
+    }
+  }
+
+  // Keyword filter
+  if (state.keyword !== 'all') {
+    const kwTotal = d.keywords[state.keyword] || 0;
+    Object.keys(d.keywords).forEach(k => { if (k !== state.keyword) d.keywords[k] = 0; });
+    d.total = kwTotal;
+  }
+
+  return d;
+}
+
+// ─── COLOR PALETTE ──────────────────────────────────────────────────────────
+const C = ['#1A3F6F','#2E6DB4','#5B9BD5','#8BBDE8','#B8D5F0','#C5DCF5','#7A9AB5','#3D6187','#6AADE4','#9DC7EE'];
+const MC = {jan:'#1A3F6F', feb:'#5B9BD5', mar:'#2E6DB4', apr:'#8BBDE8'};
+
+// ─── CHARTS ─────────────────────────────────────────────────────────────────
+const monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+  type:'bar',
+  data:{ labels:[], datasets:[{data:[],backgroundColor:[],borderRadius:8}] },
+  options:{
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} tickets`}}},
+    scales:{y:{beginAtZero:true,grid:{color:'#EEF3FA'}},x:{grid:{display:false}}},
+    responsive:true,
+    onClick:(e,els)=>{
+      if (!els.length) return;
+      const months = ['jan','feb','mar','apr'];
+      const clicked = months[els[0].index];
+      setFilter('month', state.month === clicked ? 'all' : clicked);
+    }
+  }
+});
+
+const dailyChart = new Chart(document.getElementById('dailyChart'), {
+  type:'bar',
+  data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:3}]},
+  options:{
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y} tickets`}}},
+    scales:{y:{beginAtZero:true,ticks:{stepSize:2},grid:{color:'#EEF3FA'}},x:{ticks:{maxTicksLimit:20,maxRotation:45},grid:{display:false}}},
+    responsive:true,
+  }
+});
+
+const langChart = new Chart(document.getElementById('langChart'), {
+  type:'doughnut',
+  data:{labels:[],datasets:[{data:[],backgroundColor:C,borderWidth:2,borderColor:'#fff'}]},
+  options:{
+    responsive:true,
+    plugins:{legend:{position:'right',labels:{font:{size:11},color:'#1A2E4A'}}},
+    onClick:(e,els)=>{
+      if (!els.length) return;
+      const lbl = langChart.data.labels[els[0].index];
+      const map = {'English':'en','German':'de','Spanish':'es','French':'fr','Unknown':'unknown','Dutch':'other','Portuguese BR':'other'};
+      const val = map[lbl] || 'other';
+      setFilter('lang', state.lang === val ? 'all' : val);
+    }
+  }
+});
+
+const keywordChart = new Chart(document.getElementById('keywordChart'), {
+  type:'bar',
+  data:{labels:[],datasets:[{data:[],backgroundColor:C,borderRadius:6}]},
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{x:{beginAtZero:true,grid:{color:'#EEF3FA'}},y:{grid:{display:false}}},
+    responsive:true,
+    onClick:(e,els)=>{
+      if (!els.length) return;
+      const kw = keywordChart.data.labels[els[0].index];
+      setFilter('keyword', state.keyword === kw ? 'all' : kw);
+    }
+  }
+});
+
+// ─── MAP ────────────────────────────────────────────────────────────────────
+function renderMap(mapData) {
+  const entries = Object.entries(mapData).filter(([,v])=>v>0);
+  const locs = entries.map(([k])=>ISO3[k]).filter(Boolean);
+  const vals = entries.filter(([k])=>ISO3[k]).map(([,v])=>v);
+  const texts = entries.filter(([k])=>ISO3[k]).map(([k,v])=>`${COUNTRY_NAMES[k]||k}: ${v} tickets`);
+
+  Plotly.react('world-map',[{
+    type:'choropleth', locationmode:'ISO-3',
+    locations:locs, z:vals, text:texts,
+    hovertemplate:'<b>%{text}</b><extra></extra>',
+    colorscale:[[0,'#C5DFF5'],[0.2,'#8BBDE8'],[0.5,'#4A90D9'],[0.75,'#2E6DB4'],[1,'#1A3F6F']],
+    zmin:1, zmax:Math.max(...vals,1),
+    showscale:true,
+    colorbar:{title:{text:'Tickets',font:{color:'#7A90A8',size:11}},tickfont:{color:'#7A90A8',size:10},len:0.5,thickness:10,bgcolor:'rgba(0,0,0,0)',bordercolor:'rgba(0,0,0,0)'},
+    marker:{line:{color:'#ffffff',width:0.8}},
+  }],{
+    geo:{showframe:false,showcoastlines:true,coastlinecolor:'#C8DAEA',showland:true,landcolor:'#EBF3FB',showocean:true,oceancolor:'#EEF3FA',showlakes:false,projection:{type:'natural earth'},bgcolor:'#EEF3FA'},
+    paper_bgcolor:'#EEF3FA', plot_bgcolor:'#EEF3FA',
+    margin:{t:0,b:0,l:0,r:0},
+    font:{family:'-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif'},
+  });
+
+  // Map click → country filter
+  document.getElementById('world-map').on('plotly_click', data => {
+    if (!data.points.length) return;
+    const iso3 = data.points[0].location;
+    const iso2 = ISO2_FROM_ISO3[iso3];
+    if (iso2) setFilter('country', state.country === iso2 ? 'all' : iso2);
+  });
+}
+
+// ─── LANG GRID ──────────────────────────────────────────────────────────────
+function renderLangGrid(langs) {
+  const max = Math.max(...Object.values(langs));
+  const sorted = Object.entries(langs).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('langGrid').innerHTML = sorted.map(([k,v]) => {
+    const meta = LANG_META[k]||{flag:'🌐',label:k};
+    const isActive = state.lang === k || state.country !== 'all' && COUNTRY_TO_LANG[state.country] === k;
+    const barW = Math.round(v/max*100);
+    return `<div class="lang-item ${isActive?'active':''}" onclick="toggleLang('${k}')">
+      <span>${meta.flag} ${meta.label}</span><span class="count">${v}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleLang(k) {
+  setFilter('lang', state.lang === k ? 'all' : k);
+}
+
+// ─── ACTIVE FILTER CHIPS ────────────────────────────────────────────────────
+function updateChips() {
+  const bar = document.getElementById('activeFilters');
+  const chips = [];
+  if (state.month !== 'all') chips.push({label:`Month: ${MONTHS[state.month].label}`, key:'month'});
+  if (state.lang !== 'all') chips.push({label:`Language: ${LANG_META[state.lang]?.label||state.lang}`, key:'lang'});
+  if (state.status !== 'all') chips.push({label:`Status: ${state.status}`, key:'status'});
+  if (state.keyword !== 'all') chips.push({label:`Keyword: ${state.keyword}`, key:'keyword'});
+  if (state.country !== 'all') chips.push({label:`Country: ${COUNTRY_NAMES[state.country]||state.country}`, key:'country'});
+
+  if (!chips.length) {
+    bar.innerHTML = '<span>No filters active — click any chart element to filter</span>';
+  } else {
+    bar.innerHTML = chips.map(c =>
+      `<div class="chip">${c.label} <span class="remove" onclick="clearFilter('${c.key}')">×</span></div>`
+    ).join('');
+  }
+}
+
+function clearFilter(key) { setFilter(key, 'all'); }
+
+// ─── FILTER ENGINE ──────────────────────────────────────────────────────────
+function setFilter(key, value) {
+  // Country and lang are mutually exclusive
+  if (key === 'country' && value !== 'all') state.lang = 'all';
+  if (key === 'lang' && value !== 'all') state.country = 'all';
+  state[key] = value;
+  syncPills(key, value);
+  update();
+}
+
+function syncPills(filter, value) {
+  document.querySelectorAll(`[data-filter="${filter}"]`).forEach(p => {
+    p.classList.toggle('active', p.dataset.value === value);
+  });
+}
+
+// ─── MAIN UPDATE ────────────────────────────────────────────────────────────
+function update() {
+  const d = getFilteredData();
+  const months = getSelectedMonths();
+
+  // KPIs
+  document.getElementById('kpi-total').textContent = d.total;
+  const dayCount = Object.keys(d.days).length || 1;
+  document.getElementById('kpi-daily').textContent = (d.total / dayCount).toFixed(1);
+  const resolved = (d.statuses.solved||0)+(d.statuses.closed||0);
+  const totalForRate = Object.values(d.statuses).reduce((a,b)=>a+b,0)||1;
+  document.getElementById('kpi-solved').textContent = Math.round(resolved/totalForRate*100)+'%';
+  const topLang = Object.entries(d.langs).filter(([k])=>k!=='unknown'&&k!=='other').sort((a,b)=>b[1]-a[1])[0];
+  if (topLang && d.total) {
+    document.getElementById('kpi-top-lang').textContent = (LANG_META[topLang[0]]?.label||topLang[0]).slice(0,2).toUpperCase();
+    document.getElementById('kpi-top-lang-sub').textContent = `${topLang[1]} tickets (${Math.round(topLang[1]/d.total*100)}%)`;
+  }
+  const topKw = Object.entries(d.keywords).filter(([k])=>k!=='other'&&k).sort((a,b)=>b[1]-a[1])[0];
+  if (topKw && d.total) {
+    document.getElementById('kpi-top-kw').textContent = topKw[0];
+    document.getElementById('kpi-top-kw-sub').textContent = `${topKw[1]} matches (${Math.round(topKw[1]/d.total*100)}%)`;
+  }
+  document.getElementById('kpi-total-sub').textContent = state.month==='all'?'Jan–Apr 2026':MONTHS[state.month].label;
+
+  // Monthly chart
+  const allMonths = ['jan','feb','mar','apr'];
+  monthlyChart.data.labels = allMonths.map(m=>MONTHS[m].label);
+  monthlyChart.data.datasets[0].data = allMonths.map(m=>MONTHS[m].total);
+  monthlyChart.data.datasets[0].backgroundColor = allMonths.map(m =>
+    state.month==='all'||state.month===m ? MC[m] : MC[m]+'44'
+  );
+  monthlyChart.update();
+  document.getElementById('monthly-badge').textContent = months.length+(months.length===1?' month':' months');
+
+  // Daily chart
+  const sortedDays = Object.keys(d.days).sort();
+  dailyChart.data.labels = sortedDays;
+  dailyChart.data.datasets[0].data = sortedDays.map(k=>d.days[k]);
+  dailyChart.data.datasets[0].backgroundColor = sortedDays.map(k=>{
+    const m = k.startsWith('01')?'jan':k.startsWith('02')?'feb':k.startsWith('03')?'mar':'apr';
+    return MC[m];
+  });
+  dailyChart.update();
+  document.getElementById('daily-badge').textContent = sortedDays.length+' days';
+
+  // Language chart
+  const langEntries = Object.entries(d.langs).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  langChart.data.labels = langEntries.map(([k])=>LANG_META[k]?.label||k);
+  langChart.data.datasets[0].data = langEntries.map(([,v])=>v);
+  langChart.data.datasets[0].backgroundColor = langEntries.map(([k],i)=>{
+    const isSelected = state.lang===k || (state.country!=='all'&&COUNTRY_TO_LANG[state.country]===k);
+    return isSelected ? '#1A3F6F' : C[i];
+  });
+  langChart.update();
+  document.getElementById('lang-badge').textContent = langEntries.length+' languages';
+
+  // Keyword chart
+  const kwEntries = Object.entries(d.keywords).filter(([k])=>k!=='other'&&k).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  keywordChart.data.labels = kwEntries.map(([k])=>k);
+  keywordChart.data.datasets[0].data = kwEntries.map(([,v])=>v);
+  keywordChart.data.datasets[0].backgroundColor = kwEntries.map(([k],i)=>
+    state.keyword===k ? '#1A3F6F' : C[i]
+  );
+  keywordChart.update();
+  document.getElementById('kw-badge').textContent = kwEntries.length+' keywords';
+
+  // Map
+  renderMap(d.map);
+  document.getElementById('map-badge').textContent = Object.values(d.map).filter(v=>v>0).length+' countries';
+
+  // Lang grid
+  renderLangGrid(d.langs);
+
+  // Active chips
+  updateChips();
+}
+
+// ─── PILL LISTENERS ─────────────────────────────────────────────────────────
+document.querySelectorAll('.pill[data-filter]').forEach(pill => {
+  pill.addEventListener('click', () => {
+    setFilter(pill.dataset.filter, pill.dataset.value);
+  });
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all' };
+  ['month','lang','status'].forEach(f => syncPills(f,'all'));
+  update();
+});
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+update();
+</script>
+</body>
+</html>

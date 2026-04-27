@@ -91,6 +91,20 @@
   </div>
   <div class="filter-divider"></div>
   <div class="filter-group">
+    <span class="filter-label">Plan</span>
+    <button class="pill active" data-filter="plan" data-value="all">All</button>
+    <button class="pill" data-filter="plan" data-value="pro">Pro</button>
+    <button class="pill" data-filter="plan" data-value="business">Business</button>
+    <button class="pill" data-filter="plan" data-value="unknown">Unknown</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
+    <span class="filter-label">Account type</span>
+    <button class="pill active" data-filter="account" data-value="all">All</button>
+    <button class="pill" data-filter="account" data-value="non_user">🏢 Finance / Non-user</button>
+  </div>
+  <div class="filter-divider"></div>
+  <div class="filter-group">
     <span class="filter-label">Language</span>
     <button class="pill active" data-filter="lang" data-value="all">All</button>
     <button class="pill" data-filter="lang" data-value="en">🇺🇸 English</button>
@@ -116,6 +130,21 @@
     <div class="number" id="kpi-total">635</div>
     <div class="label">Total tickets</div>
     <div class="sub" id="kpi-total-sub">Jan–Apr 2026</div>
+  </div>
+  <div class="stat" style="cursor:pointer;border-top-color:#5B9BD5" onclick="setFilter('plan', state.plan==='pro'?'all':'pro')">
+    <div class="number" style="color:#5B9BD5" id="kpi-pro">304</div>
+    <div class="label">Pro</div>
+    <div class="sub">48% of tickets</div>
+  </div>
+  <div class="stat" style="cursor:pointer;border-top-color:#1A3F6F" onclick="setFilter('plan', state.plan==='business'?'all':'business')">
+    <div class="number" style="color:#1A3F6F" id="kpi-biz">165</div>
+    <div class="label">Business</div>
+    <div class="sub">26% of tickets</div>
+  </div>
+  <div class="stat" style="cursor:pointer;border-top-color:#8BBDE8" onclick="setFilter('account', state.account==='non_user'?'all':'non_user')">
+    <div class="number" style="color:#8BBDE8" id="kpi-nonuser">31</div>
+    <div class="label">Finance / Non-user</div>
+    <div class="sub">5% of tickets</div>
   </div>
   <div class="stat">
     <div class="number" id="kpi-daily">5.6</div>
@@ -228,8 +257,17 @@ const LANG_META = {
   other:{flag:'🌏',label:'Other'},
 };
 
+// ─── SEGMENT DATA ───────────────────────────────────────────────────────────
+const SEGMENTS = {
+  all:      { total:635, months:{jan:220,feb:143,mar:190,apr:82}, langs:{en:282,unknown:161,de:55,es:22,fr:20,nl:18,pl:10,pt_br:10,it:10,ru:8,ko:7,ja:6,nb:3,da:3,other:20}, keywords:{invoice:317,receipt:151,rechnung:58,factura:30,facture:25,fattura:10,recibo:11,factuur:7,faktura:6,other:10}, map:{US:282,GB:60,AU:20,CA:22,DE:55,ES:22,FR:20,NL:18,BR:10,PL:10,IT:10,KR:7,RU:8,JP:6,DK:3,NO:3,ID:1,CZ:2} },
+  pro:      { total:304, months:{jan:114,feb:61,mar:86,apr:43},  langs:{en:170,unknown:29,de:31,es:13,fr:13,nl:5,pl:8,pt_br:7,it:6,ru:4,ko:6,ja:1,nb:2,da:1,other:8},       keywords:{invoice:132,receipt:89,rechnung:27,factura:13,facture:14,fattura:5,recibo:8,factuur:3,faktura:4,other:9}, map:{US:170,GB:30,AU:10,CA:12,DE:31,ES:13,FR:13,NL:5,BR:7,PL:8,IT:6,KR:6,RU:4,JP:1,DK:1,NO:2,ID:1,CZ:1} },
+  business: { total:165, months:{jan:56,feb:42,mar:46,apr:21},   langs:{en:71,unknown:31,de:23,es:6,fr:5,nl:11,pl:2,pt_br:2,it:2,ru:4,ko:0,ja:3,nb:0,da:0,other:5},         keywords:{invoice:96,receipt:20,rechnung:22,factura:9,facture:7,fattura:2,recibo:0,factuur:4,faktura:1,other:4}, map:{US:71,GB:20,AU:6,CA:6,DE:23,ES:6,FR:5,NL:11,BR:2,PL:2,IT:2,KR:0,RU:4,JP:3,DK:1,NO:0,ID:0,CZ:1} },
+  unknown:  { total:166, months:{jan:50,feb:40,mar:58,apr:18},   langs:{en:41,unknown:101,de:1,es:3,fr:2,nl:2,pl:0,pt_br:1,it:2,ru:0,ko:1,ja:2,nb:1,da:2,other:7},          keywords:{invoice:89,receipt:42,rechnung:9,factura:8,facture:4,fattura:3,recibo:3,factuur:0,faktura:1,other:7}, map:{US:41,GB:10,AU:4,CA:4,DE:1,ES:3,FR:2,NL:2,BR:1,PL:0,IT:2,KR:1,RU:0,JP:2,DK:2,NO:1,ID:0,CZ:0} },
+  non_user: { total:31,  months:{jan:11,feb:4,mar:6,apr:10},     langs:{en:8,unknown:18,de:2,es:0,fr:1,nl:0,pl:0,pt_br:0,it:0,ru:1,ko:0,ja:0,nb:0,da:0,other:1},            keywords:{invoice:25,receipt:4,rechnung:1,factura:0,facture:1,fattura:0,recibo:0,factuur:0,faktura:0,other:0}, map:{US:8,GB:3,AU:1,CA:1,DE:2,ES:0,FR:1,NL:0,BR:0,PL:0,IT:0,KR:0,RU:1,JP:0,DK:0,NO:0,ID:0,CZ:0} },
+};
+
 // ─── STATE ──────────────────────────────────────────────────────────────────
-let state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all' };
+let state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all', plan:'all', account:'all' };
 
 // ─── HELPERS ────────────────────────────────────────────────────────────────
 function getSelectedMonths() {
@@ -241,32 +279,42 @@ function getStatusRatio(monthKey) {
   const s = MONTHS[monthKey].statuses;
   const monthTotal = Object.values(s).reduce((a,b)=>a+b,0);
   if (!monthTotal) return 0;
-  const statusVal = s[state.status] || 0;
-  return statusVal / monthTotal;
+  return (s[state.status] || 0) / monthTotal;
 }
 
-function scaleObj(obj, ratio) {
-  const out = {};
-  Object.entries(obj).forEach(([k,v]) => out[k] = Math.round(v * ratio));
-  return out;
+function getSegmentKey() {
+  if (state.account === 'non_user') return 'non_user';
+  if (state.plan !== 'all') return state.plan;
+  return 'all';
 }
 
 function getFilteredData() {
   const months = getSelectedMonths();
+  const segKey = getSegmentKey();
+  const seg = SEGMENTS[segKey];
+
   const d = { total:0, days:{}, langs:{}, keywords:{}, statuses:{}, map:{} };
 
   for (const m of months) {
     const src = MONTHS[m];
     const ratio = getStatusRatio(m);
-    const scaled = v => Math.round(v * ratio);
 
-    d.total += scaled(src.total);
+    // Scale monthly totals by segment ratio for this month
+    const segMonthTotal = seg.months[m] || 0;
+    const allMonthTotal = SEGMENTS.all.months[m] || 1;
+    const segRatio = segMonthTotal / allMonthTotal;
+    const combined = ratio * segRatio;
+    const scaled = v => Math.round(v * combined);
+
+    d.total += Math.round(segMonthTotal * ratio);
     Object.entries(src.days).forEach(([k,v]) => d.days[k] = (d.days[k]||0) + scaled(v));
-    Object.entries(src.langs).forEach(([k,v]) => d.langs[k] = (d.langs[k]||0) + scaled(v));
-    Object.entries(src.keywords).forEach(([k,v]) => d.keywords[k] = (d.keywords[k]||0) + scaled(v));
     Object.entries(src.statuses).forEach(([k,v]) => d.statuses[k] = (d.statuses[k]||0)+v);
-    Object.entries(src.map).forEach(([k,v]) => d.map[k] = (d.map[k]||0) + scaled(v));
   }
+
+  // Use segment-level lang/keyword/map directly (more accurate)
+  Object.entries(seg.langs).forEach(([k,v]) => d.langs[k] = Math.round(v * (state.status==='all'?1: d.total/(seg.total||1))));
+  Object.entries(seg.keywords).forEach(([k,v]) => d.keywords[k] = Math.round(v * (state.status==='all'?1: d.total/(seg.total||1))));
+  Object.entries(seg.map).forEach(([k,v]) => d.map[k] = Math.round(v * (state.status==='all'?1: d.total/(seg.total||1))));
 
   // Language filter
   if (state.lang !== 'all') {
@@ -416,6 +464,8 @@ function updateChips() {
   const bar = document.getElementById('activeFilters');
   const chips = [];
   if (state.month !== 'all') chips.push({label:`Month: ${MONTHS[state.month].label}`, key:'month'});
+  if (state.plan !== 'all') chips.push({label:`Plan: ${state.plan.charAt(0).toUpperCase()+state.plan.slice(1)}`, key:'plan'});
+  if (state.account !== 'all') chips.push({label:`Account: Finance / Non-user`, key:'account'});
   if (state.lang !== 'all') chips.push({label:`Language: ${LANG_META[state.lang]?.label||state.lang}`, key:'lang'});
   if (state.status !== 'all') chips.push({label:`Status: ${state.status}`, key:'status'});
   if (state.keyword !== 'all') chips.push({label:`Keyword: ${state.keyword}`, key:'keyword'});
@@ -437,6 +487,9 @@ function setFilter(key, value) {
   // Country and lang are mutually exclusive
   if (key === 'country' && value !== 'all') state.lang = 'all';
   if (key === 'lang' && value !== 'all') state.country = 'all';
+  // Plan and account are mutually exclusive
+  if (key === 'plan' && value !== 'all') { state.account = 'all'; syncPills('account','all'); }
+  if (key === 'account' && value !== 'all') { state.plan = 'all'; syncPills('plan','all'); }
   state[key] = value;
   syncPills(key, value);
   update();
@@ -533,8 +586,8 @@ document.querySelectorAll('.pill[data-filter]').forEach(pill => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-  state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all' };
-  ['month','lang','status'].forEach(f => syncPills(f,'all'));
+  state = { month:'all', lang:'all', status:'all', keyword:'all', country:'all', plan:'all', account:'all' };
+  ['month','lang','status','plan','account'].forEach(f => syncPills(f,'all'));
   update();
 });
 

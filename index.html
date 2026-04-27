@@ -236,26 +236,43 @@ function getSelectedMonths() {
   return state.month === 'all' ? ['jan','feb','mar','apr'] : [state.month];
 }
 
+function getStatusRatio(monthKey) {
+  if (state.status === 'all') return 1;
+  const s = MONTHS[monthKey].statuses;
+  const monthTotal = Object.values(s).reduce((a,b)=>a+b,0);
+  if (!monthTotal) return 0;
+  const statusVal = s[state.status] || 0;
+  return statusVal / monthTotal;
+}
+
+function scaleObj(obj, ratio) {
+  const out = {};
+  Object.entries(obj).forEach(([k,v]) => out[k] = Math.round(v * ratio));
+  return out;
+}
+
 function getFilteredData() {
   const months = getSelectedMonths();
   const d = { total:0, days:{}, langs:{}, keywords:{}, statuses:{}, map:{} };
+
   for (const m of months) {
     const src = MONTHS[m];
-    d.total += src.total;
-    Object.entries(src.days).forEach(([k,v]) => d.days[k] = (d.days[k]||0)+v);
-    Object.entries(src.langs).forEach(([k,v]) => d.langs[k] = (d.langs[k]||0)+v);
-    Object.entries(src.keywords).forEach(([k,v]) => d.keywords[k] = (d.keywords[k]||0)+v);
+    const ratio = getStatusRatio(m);
+    const scaled = v => Math.round(v * ratio);
+
+    d.total += scaled(src.total);
+    Object.entries(src.days).forEach(([k,v]) => d.days[k] = (d.days[k]||0) + scaled(v));
+    Object.entries(src.langs).forEach(([k,v]) => d.langs[k] = (d.langs[k]||0) + scaled(v));
+    Object.entries(src.keywords).forEach(([k,v]) => d.keywords[k] = (d.keywords[k]||0) + scaled(v));
     Object.entries(src.statuses).forEach(([k,v]) => d.statuses[k] = (d.statuses[k]||0)+v);
-    Object.entries(src.map).forEach(([k,v]) => d.map[k] = (d.map[k]||0)+v);
+    Object.entries(src.map).forEach(([k,v]) => d.map[k] = (d.map[k]||0) + scaled(v));
   }
 
-  // Language filter — scale down counts proportionally
+  // Language filter
   if (state.lang !== 'all') {
     const langMap = {en:['US','GB','AU','CA'],de:['DE'],es:['ES'],fr:['FR'],other:['NL','BR','PL','IT','KR','RU','JP','DK','NO','ID','CZ']};
     const keepCountries = langMap[state.lang] || [];
-    // Dim non-matching countries on map
     Object.keys(d.map).forEach(k => { if (!keepCountries.includes(k)) d.map[k] = 0; });
-    // Filter langs to just selected
     const langTotal = d.langs[state.lang] || 0;
     Object.keys(d.langs).forEach(k => { if (k !== state.lang) d.langs[k] = 0; });
     d.total = langTotal;
@@ -264,12 +281,10 @@ function getFilteredData() {
   // Country filter
   if (state.country !== 'all') {
     Object.keys(d.map).forEach(k => { if (k !== state.country) d.map[k] = 0; });
-    // Map country to lang
     const cLang = COUNTRY_TO_LANG[state.country];
     if (cLang) {
-      const v = d.langs[cLang] || 0;
       Object.keys(d.langs).forEach(k => { if (k !== cLang && k !== 'unknown') d.langs[k] = 0; });
-      d.total = v;
+      d.total = d.langs[cLang] || 0;
     }
   }
 

@@ -127,22 +127,22 @@
 <!-- KPI Cards -->
 <div class="stats">
   <div class="stat highlight">
-    <div class="number" id="kpi-total">635</div>
+    <div class="number" id="kpi-total">551</div>
     <div class="label">Total tickets</div>
     <div class="sub" id="kpi-total-sub">Jan–Apr 2026</div>
   </div>
   <div class="stat" style="cursor:pointer;border-top-color:#5B9BD5" onclick="setFilter('plan', state.plan==='pro'?'all':'pro')">
-    <div class="number" style="color:#5B9BD5" id="kpi-pro">304</div>
+    <div class="number" style="color:#5B9BD5" id="kpi-pro">261</div>
     <div class="label">Pro</div>
-    <div class="sub">48% of tickets</div>
+    <div class="sub">47% of tickets</div>
   </div>
   <div class="stat" style="cursor:pointer;border-top-color:#1A3F6F" onclick="setFilter('plan', state.plan==='business'?'all':'business')">
-    <div class="number" style="color:#1A3F6F" id="kpi-biz">165</div>
+    <div class="number" style="color:#1A3F6F" id="kpi-biz">145</div>
     <div class="label">Business</div>
     <div class="sub">26% of tickets</div>
   </div>
   <div class="stat" style="cursor:pointer;border-top-color:#8BBDE8" onclick="setFilter('account', state.account==='non_user'?'all':'non_user')">
-    <div class="number" style="color:#8BBDE8" id="kpi-nonuser">31</div>
+    <div class="number" style="color:#8BBDE8" id="kpi-nonuser">28</div>
     <div class="label">Finance / Non-user</div>
     <div class="sub">5% of tickets</div>
   </div>
@@ -208,7 +208,7 @@
 // ─── DATA ───────────────────────────────────────────────────────────────────
 const MONTHS = {
   jan: {
-    label:'January', total:218,
+    label:'January', total:188,
     days:{"01-02":12,"01-03":6,"01-04":5,"01-05":11,"01-06":6,"01-07":10,"01-08":11,"01-09":7,"01-10":8,"01-11":8,"01-12":10,"01-13":11,"01-14":10,"01-15":5,"01-16":5,"01-17":7,"01-18":5,"01-19":4,"01-20":8,"01-21":6,"01-22":9,"01-23":6,"01-24":2,"01-26":10,"01-27":10,"01-28":8,"01-29":7,"01-30":8,"01-31":5},
     langs:{en:108,unknown:53,de:13,nl:9,es:8,fr:6,pl:4,pt_br:4,other:15},
     keywords:{invoice:116,receipt:48,rechnung:19,factura:8,facture:7,recibo:6,fatura:4,fattura:4,other:8},
@@ -216,7 +216,7 @@ const MONTHS = {
     map:{US:108,DE:13,NL:9,ES:8,FR:6,PL:4,BR:4,GB:40,AU:10,CA:12,IT:3,KR:2,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
   },
   feb: {
-    label:'February', total:142,
+    label:'February', total:127,
     days:{"02-01":2,"02-02":6,"02-03":5,"02-04":15,"02-06":2,"02-07":5,"02-08":4,"02-09":7,"02-10":8,"02-11":3,"02-12":9,"02-13":5,"02-14":3,"02-16":4,"02-17":10,"02-18":6,"02-19":7,"02-20":5,"02-22":4,"02-23":9,"02-24":7,"02-25":7,"02-26":4,"02-27":5,"02-28":1},
     langs:{en:58,unknown:43,de:12,fr:6,es:5,pl:4,pt_br:4,nl:4,other:7},
     keywords:{invoice:72,receipt:33,rechnung:15,facture:7,factura:7,faktura:4,fattura:2,fatura:2,other:1},
@@ -224,7 +224,7 @@ const MONTHS = {
     map:{US:58,DE:12,FR:6,ES:5,PL:4,BR:4,NL:4,GB:20,AU:6,CA:8,IT:2,KR:1,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
   },
   mar: {
-    label:'March', total:188,
+    label:'March', total:161,
     days:{"03-01":2,"03-02":8,"03-03":5,"03-04":10,"03-05":6,"03-06":4,"03-07":3,"03-08":6,"03-09":11,"03-10":8,"03-11":14,"03-12":4,"03-13":12,"03-14":4,"03-15":2,"03-16":12,"03-17":5,"03-18":7,"03-19":3,"03-20":3,"03-21":3,"03-22":5,"03-23":14,"03-24":9,"03-25":4,"03-26":6,"03-27":3,"03-29":3,"03-30":7,"03-31":7},
     langs:{en:83,unknown:47,de:20,fr:6,es:6,it:4,nl:4,other:20},
     keywords:{invoice:81,receipt:59,rechnung:15,factura:10,facture:9,recibo:3,factuur:3,other:10},
@@ -232,7 +232,7 @@ const MONTHS = {
     map:{US:83,DE:20,FR:6,ES:6,IT:4,NL:4,GB:22,AU:8,CA:10,BR:5,PL:3,KR:2,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
   },
   apr: {
-    label:'April', total:87,
+    label:'April', total:75,
     days:{"04-02":6,"04-03":1,"04-04":3,"04-05":3,"04-06":2,"04-07":4,"04-08":7,"04-09":6,"04-10":3,"04-11":1,"04-13":5,"04-14":5,"04-15":7,"04-16":2,"04-18":1,"04-19":1,"04-20":6,"04-21":5,"04-22":7,"04-23":6,"04-24":1,"04-25":1,"04-26":4,"04-27":0},
     langs:{en:33,unknown:18,de:10,es:3,fr:2,pt_br:2,cs:1,pl:1,ru:1,it:1,nl:1,ko:1,other:13},
     keywords:{invoice:48,receipt:11,rechnung:9,factura:5,facture:2,fattura:2,other:10},
@@ -259,11 +259,11 @@ const LANG_META = {
 
 // ─── SEGMENT DATA ───────────────────────────────────────────────────────────
 const SEGMENTS = {
-  all:      { total:635, months:{jan:220,feb:143,mar:190,apr:82}, langs:{en:282,unknown:161,de:55,es:22,fr:20,nl:18,pl:10,pt_br:10,it:10,ru:8,ko:7,ja:6,nb:3,da:3,other:20}, keywords:{invoice:317,receipt:151,rechnung:58,factura:30,facture:25,fattura:10,recibo:11,factuur:7,faktura:6,other:10}, map:{US:282,GB:60,AU:20,CA:22,DE:55,ES:22,FR:20,NL:18,BR:10,PL:10,IT:10,KR:7,RU:8,JP:6,DK:3,NO:3,ID:1,CZ:2} },
-  pro:      { total:304, months:{jan:114,feb:61,mar:86,apr:43},  langs:{en:170,unknown:29,de:31,es:13,fr:13,nl:5,pl:8,pt_br:7,it:6,ru:4,ko:6,ja:1,nb:2,da:1,other:8},       keywords:{invoice:132,receipt:89,rechnung:27,factura:13,facture:14,fattura:5,recibo:8,factuur:3,faktura:4,other:9}, map:{US:170,GB:30,AU:10,CA:12,DE:31,ES:13,FR:13,NL:5,BR:7,PL:8,IT:6,KR:6,RU:4,JP:1,DK:1,NO:2,ID:1,CZ:1} },
-  business: { total:165, months:{jan:56,feb:42,mar:46,apr:21},   langs:{en:71,unknown:31,de:23,es:6,fr:5,nl:11,pl:2,pt_br:2,it:2,ru:4,ko:0,ja:3,nb:0,da:0,other:5},         keywords:{invoice:96,receipt:20,rechnung:22,factura:9,facture:7,fattura:2,recibo:0,factuur:4,faktura:1,other:4}, map:{US:71,GB:20,AU:6,CA:6,DE:23,ES:6,FR:5,NL:11,BR:2,PL:2,IT:2,KR:0,RU:4,JP:3,DK:1,NO:0,ID:0,CZ:1} },
-  unknown:  { total:166, months:{jan:50,feb:40,mar:58,apr:18},   langs:{en:41,unknown:101,de:1,es:3,fr:2,nl:2,pl:0,pt_br:1,it:2,ru:0,ko:1,ja:2,nb:1,da:2,other:7},          keywords:{invoice:89,receipt:42,rechnung:9,factura:8,facture:4,fattura:3,recibo:3,factuur:0,faktura:1,other:7}, map:{US:41,GB:10,AU:4,CA:4,DE:1,ES:3,FR:2,NL:2,BR:1,PL:0,IT:2,KR:1,RU:0,JP:2,DK:2,NO:1,ID:0,CZ:0} },
-  non_user: { total:31,  months:{jan:11,feb:4,mar:6,apr:10},     langs:{en:8,unknown:18,de:2,es:0,fr:1,nl:0,pl:0,pt_br:0,it:0,ru:1,ko:0,ja:0,nb:0,da:0,other:1},            keywords:{invoice:25,receipt:4,rechnung:1,factura:0,facture:1,fattura:0,recibo:0,factuur:0,faktura:0,other:0}, map:{US:8,GB:3,AU:1,CA:1,DE:2,ES:0,FR:1,NL:0,BR:0,PL:0,IT:0,KR:0,RU:1,JP:0,DK:0,NO:0,ID:0,CZ:0} },
+  all:      { total:551, months:{jan:188,feb:127,mar:161,apr:75}, langs:{en:245,unknown:140,de:48,es:19,fr:17,nl:16,pl:9,pt_br:9,it:9,ru:7,ko:6,ja:5,nb:3,da:3,other:15}, keywords:{invoice:275,receipt:131,rechnung:50,factura:26,facture:22,fattura:9,recibo:9,factuur:6,faktura:5,other:18}, map:{US:245,GB:52,AU:17,CA:19,DE:48,ES:19,FR:17,NL:16,BR:9,PL:9,IT:9,KR:6,RU:7,JP:5,DK:3,NO:3,ID:1,CZ:2} },
+  pro:      { total:261, months:{jan:98,feb:52,mar:73,apr:38},   langs:{en:145,unknown:25,de:27,es:11,fr:11,nl:4,pl:7,pt_br:6,it:5,ru:3,ko:5,ja:1,nb:2,da:1,other:7},      keywords:{invoice:114,receipt:77,rechnung:23,factura:11,facture:12,fattura:4,recibo:7,factuur:2,faktura:3,other:8}, map:{US:145,GB:26,AU:9,CA:10,DE:27,ES:11,FR:11,NL:4,BR:6,PL:7,IT:5,KR:5,RU:3,JP:1,DK:1,NO:2,ID:1,CZ:1} },
+  business: { total:145, months:{jan:49,feb:37,mar:40,apr:19},   langs:{en:62,unknown:27,de:20,es:5,fr:4,nl:10,pl:2,pt_br:2,it:2,ru:4,ko:0,ja:3,nb:0,da:0,other:4},        keywords:{invoice:84,receipt:17,rechnung:19,factura:8,facture:6,fattura:2,recibo:0,factuur:4,faktura:1,other:4}, map:{US:62,GB:17,AU:5,CA:5,DE:20,ES:5,FR:4,NL:10,BR:2,PL:2,IT:2,KR:0,RU:4,JP:3,DK:1,NO:0,ID:0,CZ:1} },
+  unknown:  { total:145, months:{jan:41,feb:38,mar:48,apr:18},   langs:{en:38,unknown:88,de:1,es:3,fr:2,nl:2,pl:0,pt_br:1,it:2,ru:0,ko:1,ja:1,nb:1,da:2,other:4},          keywords:{invoice:77,receipt:37,rechnung:8,factura:7,facture:4,fattura:3,recibo:2,factuur:0,faktura:1,other:6}, map:{US:38,GB:9,AU:3,CA:4,DE:1,ES:3,FR:2,NL:2,BR:1,PL:0,IT:2,KR:1,RU:0,JP:1,DK:2,NO:1,ID:0,CZ:0} },
+  non_user: { total:28,  months:{jan:10,feb:3,mar:5,apr:10},     langs:{en:7,unknown:16,de:2,es:0,fr:1,nl:0,pl:0,pt_br:0,it:0,ru:1,ko:0,ja:0,nb:0,da:0,other:1},           keywords:{invoice:22,receipt:3,rechnung:1,factura:0,facture:1,fattura:0,recibo:0,factuur:0,faktura:0,other:1}, map:{US:7,GB:3,AU:1,CA:1,DE:2,ES:0,FR:1,NL:0,BR:0,PL:0,IT:0,KR:0,RU:1,JP:0,DK:0,NO:0,ID:0,CZ:0} },
 };
 
 // ─── STATE ──────────────────────────────────────────────────────────────────

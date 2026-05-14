@@ -84,7 +84,7 @@
     <h1>📊 Billing Support Tickets — 2026 YTD</h1>
     <p>Todoist CX · Jan 1 – Apr 27, 2026 · First customer message methodology</p>
   </div>
-  <span style="font-size:11px;opacity:0.7">Last updated: May 8, 2026</span>
+  <span style="font-size:11px;opacity:0.7">Last updated: Apr 28, 2026</span>
 </header>
 
 <!-- Active filter chips -->
@@ -150,7 +150,7 @@
   <div class="stat highlight">
     <div class="number" id="kpi-total">1,901</div>
     <div class="label">Total tickets</div>
-    <div class="sub" id="kpi-total-sub">Jan–May 2026</div>
+    <div class="sub" id="kpi-total-sub">Jan–Apr 2026</div>
   </div>
   <div class="stat" style="cursor:pointer;border-top-color:#5B9BD5" onclick="setFilter('plan', state.plan==='pro'?'all':'pro')">
     <div class="number" style="color:#5B9BD5" id="kpi-pro">—</div>
@@ -274,7 +274,7 @@ const MONTHS = {
     map:{US:83,DE:20,FR:6,ES:6,IT:4,NL:4,GB:22,AU:8,CA:10,BR:5,PL:3,KR:2,RU:1,JP:1,DK:1,NO:1,ID:1,CZ:1},
   },
   apr: {
-    label:'April', total:76,
+    label:'April', total:63,
     days:{"04-02":6,"04-03":1,"04-04":3,"04-05":3,"04-06":2,"04-07":4,"04-08":7,"04-09":6,"04-10":3,"04-11":1,"04-13":5,"04-14":5,"04-15":7,"04-16":2,"04-18":1,"04-19":1,"04-20":6,"04-21":5,"04-22":7,"04-23":6,"04-24":1,"04-25":1,"04-26":4,"04-27":0},
     langs:{en:33,unknown:18,de:10,es:3,fr:2,pt_br:2,cs:1,pl:1,ru:1,it:1,nl:1,ko:1,other:13},
     keywords:{invoice:48,receipt:11,rechnung:9,factura:5,facture:2,fattura:2,other:10},
@@ -606,7 +606,7 @@ function update() {
     document.getElementById('kpi-top-kw').textContent = topKw[0];
     document.getElementById('kpi-top-kw-sub').textContent = `${topKw[1]} matches (${Math.round(topKw[1]/d.total*100)}%)`;
   }
-  document.getElementById('kpi-total-sub').textContent = state.month==='all'?'Jan–May 2026':MONTHS[state.month].label;
+  document.getElementById('kpi-total-sub').textContent = state.month==='all'?'Jan–Apr 2026':MONTHS[state.month].label;
   const _cat = ALL_TICKETS.filter(t=>state.category==='all'||t.category===state.category);
   const _tot = _cat.length||1;
   const _pro = _cat.filter(t=>t.plan==='pro').length;
